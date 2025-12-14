@@ -1,4 +1,6 @@
 library(tidyverse)
+library(ggplot2)
+
 # The other libraries like 'corrr', 'ggcorrplot', 'FactoMineR', 
 # 'factoextra', 'rrcov', and 'mt' are not strictly needed for this
 # core PCA and regression task, but we keep the main ones.
@@ -76,3 +78,40 @@ fviz_pca_var(
   gradient.cols = c("red", "orange", "green"),
   repel = TRUE
 )
+
+# Create quadrant labels based on PC1 and PC2
+final_data$Quadrant <- with(final_data, ifelse(PC1 >= 0 & PC2 >= 0, "Highly Engaged Content-Focused",
+                                        ifelse(PC1 >= 0 & PC2 < 0, "Highly Engaged Process-Oriented",
+                                        ifelse(PC1 < 0 & PC2 >= 0, "Selective Content-Focused",
+                                                             "Low Engagement"))))
+# Plot learner quadrants
+ggplot(final_data, aes(x = PC1, y = PC2, color = Quadrant)) +
+  geom_point(size = 2) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "red") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  scale_color_manual(values = c(
+    "Highly Engaged Content-Focused" = "green",
+    "Highly Engaged Process-Oriented" = "orange",
+    "Selective Content-Focused" = "purple",
+    "Low Engagement" = "brown"
+  )) +
+  theme_minimal() +
+  labs(title = "Learner Quadrants", x = "PC1 (Engagement)", y = "PC2 (Traditional vs Guided Style)")
+
+#Create GPA vs PC1 Plot with regression line
+ggplot(final_data, aes(x = PC1, y = GPA)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm", color = "red") +
+  theme_minimal() +
+  labs(title = "GPA vs PC1", x = "PC1 (Engagement)", y = "GPA")
+
+#Create GPA vs PC2 Plot with regression line 
+ggplot(final_data, aes(x = PC2, y = GPA)) +
+  geom_point(color = "purple") +
+  geom_smooth(method = "lm", color = "red") +
+  theme_minimal() +
+  labs(title = "GPA vs PC2", x = "PC2 (Traditional vs Guided Style)", y = "GPA")
+
+
+
+
